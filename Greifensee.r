@@ -18,12 +18,15 @@
     #install.packages("tidyverse")
     #install.packages("readxl") 
     #install.packages("lubridate")
-    #install.packages("here")   
+    #install.packages("here")
+   # install.packages("styler")
+   # install.packages("lintr")  
     library(tidyverse)
     library(readxl)
     library(lubridate)
     library(here)
-
+    library(styler)
+    library(lintr)   
 
 #Hauptpfad
     hauptPfad <- here()
@@ -33,7 +36,6 @@
         panel.grid.minor = element_blank(),
         strip.background = element_rect(colour="grey85"),
         panel.border = element_rect(colour = "grey85"))
-    
     
 #Funktionen (u.a. trotz fehlender Werte ausfuehren)
     meanNA <- function(x){mean(x, na.rm = TRUE)}
@@ -53,7 +55,7 @@
             mutate(Tage = parse_date(Datum, format = "%d.%m.%Y"),
                 Jahre = year(Tage)) %>%
             select(Tage, Jahre, Pegel)      
-      
+     
 
 #--------------------------------------------------------------------------
 #Tests: Fehlende Werte?
@@ -77,25 +79,22 @@
         labs (x = "", y = "Pegel [m ü.M.]") +
         neutral
     
-    ggsave(paste0(hauptPfad, "/Grafiken/1_Pegel_Tage.pdf"), g1,
+    ggsave(paste0(hauptPfad, "/Grafiken/1_Pegel_Tage.pdf"), g1,  
         width = 12, height = 8, units = "cm")
 
 
-    
-    ggplot() + 
-        geom_line(data = greif, aes(x = Tage, y = Pegel)) +
-        labs (x = "", y = "Pegel [m ü.M.]") +
-theme_bw() + theme(panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(),
-        strip.background = element_rect(colour="grey85"),
-        panel.border = element_rect(colour = "grey85"))    
 
-    neutral <- theme_bw() + theme(panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(),
-        strip.background = element_rect(colour="grey85"),
-        panel.border = element_rect(colour = "grey85"))    
-    
-    
+
+
+
+
+
+
+
+
+
+
+
 
 #--------------------------------------------------------------------------
 #Aggregieren: Mittlerer Pegel pro Jahr
@@ -107,8 +106,6 @@ theme_bw() + theme(panel.grid.major = element_blank(),
             summarise(Pegel = meanNA(Pegel)) %>%       
         ungroup()
     
-    # greifDF <- as.data.frame(greifJahr)
-    # head(greifDF)
     
 #Grafik
     pdf(paste0(hauptPfad, "3_Resultate/22_Tidyverse_Pegel_Jahre.pdf"), width = 9, height = 5) 

@@ -1,5 +1,5 @@
 #--------------------------------------------------------------------------
-#Pegel des Greifensees, Tidyverse-Code
+#Pegel des Greifensees
 #
 #
 #
@@ -23,13 +23,10 @@
     library(readxl)
     library(lubridate)
     library(here)
-    
+
+
 #Hauptpfad
-    hauptPfad <- "C:/Users/Rosin/Desktop/FR/2021/2_Vorbereitung/2_Hausuebung/"
-    
-#Alternative
-    # hauptPfad <- here() %>% 
-    #     str_remove("1_Code") 
+    hauptPfad <- here()
    
 #Funktion: Neutrales Design fuer ggplot
     neutral <- theme_bw() + theme(panel.grid.major = element_blank(),
@@ -50,27 +47,14 @@
 #--------------------------------------------------------------------------
 
 #Greifensee-Pegelstand importieren und aufbereiten
-    importPfad <- paste0(hauptPfad, "2_Daten/Greifensee.xlsx") 
+    importPfad <- paste0(hauptPfad, "/Greifensee.csv") 
     
-    greif <- read_excel(importPfad) %>% 
-            mutate(Tage = ymd(Datum),
-                Jahre = year(Tage)) %>% 
-            select(Tage, Jahre, Pegel)
-    
-    t1 <- as_date("1998-1-3")
-    
-    neu <- mutate(greif, 
-              Vor = if_else((Tage < t1) | (Pegel > 440), 0, 2))
-    
-    
-  
-#Falls die Spalte 'Datum' als Text importiert: noch parsen    
-    # greif <- read_excel(importPfad) %>% 
-    #         mutate(Tage = parse_date(Datum, format = "%d.%m.%Y"),
-    #             Jahre = year(Tage)) %>% 
-    #         select(Tage, Jahre, Pegel)    
+    greif <- read_csv(importPfad) %>% 
+            mutate(Tage = parse_date(Datum, format = "%d.%m.%Y"),
+                Jahre = year(Tage)) %>%
+            select(Tage, Jahre, Pegel)      
       
-    
+
 #--------------------------------------------------------------------------
 #Tests: Fehlende Werte?
 #--------------------------------------------------------------------------
@@ -87,16 +71,27 @@
 #Grafik: Pegel pro Tag
 #--------------------------------------------------------------------------
 
-#Grafik
-    pdf(paste0(hauptPfad, "3_Resultate/21_Tidyverse_Pegel_Tage.pdf"), width = 9, height = 5) 
+#Grafik    
+    g1 <- ggplot() + 
+        geom_line(data = greif, aes(x = Tage, y = Pegel)) +
+        labs (x = "", y = "Pegel [m Ã¼.M.]") +
+        neutral
     
-        ggplot() + neutral + geom_line(data = greif, aes(x = Tage, y = Pegel)) +
-            labs (x = "", y = "Pegel [m ü.M.]")
-        
-    dev.off()
+    ggsave(paste0(hauptPfad, "/Grafiken/1_Pegel_Tage.pdf"), g1,
+        width = 12, height = 8, units = "cm")
+
+
     
-    
-    
+    ggplot() + 
+        geom_line(data = greif, aes(x = Tage, y = Pegel)) +
+        labs (x = "", y = "Pegel [m Ã¼.M.]") +
+        neutral
+ 
+
+theme_bw() + theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        strip.background = element_rect(colour="grey85"),
+        panel.border = element_rect(colour = "grey85"))    
 
 #--------------------------------------------------------------------------
 #Aggregieren: Mittlerer Pegel pro Jahr
@@ -115,7 +110,7 @@
     pdf(paste0(hauptPfad, "3_Resultate/22_Tidyverse_Pegel_Jahre.pdf"), width = 9, height = 5) 
     
         ggplot() + neutral + geom_line(data = greifJahr, aes(x = Jahre, y = Pegel)) +
-            labs (x = "", y = "Pegel [m ü.M.]")
+            labs (x = "", y = "Pegel [m Ã¼.M.]")
         
     dev.off()
     
@@ -140,7 +135,7 @@
         ggplot() + neutral + 
             geom_line(data = MonatJahr, aes(x = Jahre, y = Pegel)) +
             facet_wrap(~ Monate, nrow = 3) +
-            labs (x = "", y = "Pegel [m ü.M.]")    
+            labs (x = "", y = "Pegel [m Ã¼.M.]")    
 
     dev.off()    
         
@@ -171,7 +166,7 @@
             geom_line(data = MonatJahrTag, aes(x = TageOhneJahr, y = Pegel, color = Jahre)) +
             facet_wrap(~ Monate, nrow = 3) +
             scale_colour_manual(values = farben) +
-            labs (x = "Tag im Monat", y = "Pegel [m ü.M.]", color = "Jahre")  
+            labs (x = "Tag im Monat", y = "Pegel [m Ã¼.M.]", color = "Jahre")  
     
     dev.off()
     
@@ -205,7 +200,7 @@
             geom_polygon(data=poly, mapping=aes(x=x, y=y), fill = "grey90") +           
             geom_vline(aes(xintercept = xSeqStriche), color = "grey90") +
             geom_line(data = greif, aes(x = Tage, y = Pegel), color = "blue4") + 
-            labs (x = "", y = "Pegel [m ü.M.]") +
+            labs (x = "", y = "Pegel [m Ã¼.M.]") +
             scale_x_date(limits = c(xBeginn, xEnde), breaks = xSeqStriche, 
                 labels = xSeqText, expand = c(0, 0)) +
             theme(axis.text.x = element_text(hjust = -0.2)) +

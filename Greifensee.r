@@ -85,13 +85,17 @@
     ggplot() + 
         geom_line(data = greif, aes(x = Tage, y = Pegel)) +
         labs (x = "", y = "Pegel [m ü.M.]") +
-        neutral
- 
-
 theme_bw() + theme(panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
         strip.background = element_rect(colour="grey85"),
         panel.border = element_rect(colour = "grey85"))    
+
+    neutral <- theme_bw() + theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        strip.background = element_rect(colour="grey85"),
+        panel.border = element_rect(colour = "grey85"))    
+    
+    
 
 #--------------------------------------------------------------------------
 #Aggregieren: Mittlerer Pegel pro Jahr

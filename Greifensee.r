@@ -76,23 +76,11 @@
 #Grafik    
     g1 <- ggplot() + 
         geom_line(data = greif, aes(x = Tage, y = Pegel)) +
-        labs (x = "", y = "Pegel [m ü.M.]") +
+        labs(x = "", y = "Pegel [m ü.M.]") +
         neutral
     
     ggsave(paste0(hauptPfad, "/Grafiken/1_Pegel_Tage.pdf"), g1,  
         width = 12, height = 8, units = "cm")
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -106,15 +94,14 @@
             summarise(Pegel = meanNA(Pegel)) %>%       
         ungroup()
     
+#Grafik    
+    g2 <- ggplot() + 
+        geom_line(data = greifJahr, aes(x = Jahre, y = Pegel)) +
+        labs(x = "", y = "Pegel [m ü.M.]") + neutral 
     
-#Grafik
-    pdf(paste0(hauptPfad, "3_Resultate/22_Tidyverse_Pegel_Jahre.pdf"), width = 9, height = 5) 
-    
-        ggplot() + neutral + geom_line(data = greifJahr, aes(x = Jahre, y = Pegel)) +
-            labs (x = "", y = "Pegel [m ü.M.]")
-        
-    dev.off()
-    
+    ggsave(paste0(hauptPfad, "/Grafiken/2_Pegel_Jahre.pdf"), g2,  
+        width = 12, height = 8, units = "cm")
+
 
 #--------------------------------------------------------------------------
 #Facetplot: Mittlerer Pegel pro Monat und Jahr
@@ -129,99 +116,62 @@
         select(Jahre, Monate, Pegel) %>% 
         arrange(Jahre, Monate)
     
-
-#Grafik
-    pdf(paste0(hauptPfad, "3_Resultate/23_Tidyverse_Pegel_Monate-Jahre.pdf"), width = 10, height = 8) 
-        
-        ggplot() + neutral + 
-            geom_line(data = MonatJahr, aes(x = Jahre, y = Pegel)) +
-            facet_wrap(~ Monate, nrow = 3) +
-            labs (x = "", y = "Pegel [m ü.M.]")    
-
-    dev.off()    
-        
+#Grafik    
+    g3 <- ggplot() + 
+        geom_line(data = MonatJahr, aes(x = Jahre, y = Pegel)) +
+        facet_wrap(~ Monate, nrow = 3) +
+        labs(x = "", y = "Pegel [m ü.M.]") +
+        neutral   
     
-    
+    ggsave(paste0(hauptPfad, "/Grafiken/3_Pegel_Monate-Jahre.pdf"), g3,  
+        width = 20, height = 15, units = "cm")
+
+   
 #--------------------------------------------------------------------------
 #Zusaetzlich: Nach Monat und Jahr die einzelnen Tagespegel
 #--------------------------------------------------------------------------
-   
+
 #Daten aufbereiten
-    MonatJahrTag <- mutate(greif, Monate = month(Tage, label = TRUE, abbr = TRUE),
-        Jahre = as.factor(year(Tage)),
+    MonatJahrTag <- mutate(greif, 
+        Monate = month(Tage, label = TRUE, abbr = TRUE),
         TageOhneJahr = day(Tage))
     
-        #Alternative, falls man die Sprache umstellen will    
-        #   MonateZahl = month(Datum) 
-        #   Monate = ordered(MonatZahl, levels = 1:12, labels = date_names_lang("de")$mon)
-       
-#Farben
-    nJahre <- length(unique(MonatJahrTag$Jahre))
-    farben <- colorRampPalette(c("grey80", "red", "black"))(nJahre)  
+#Alternative, falls die Sprache umgestellt werden muss    
+#   MonateZahl = month(Datum) 
+#   Monate = ordered(MonatZahl, levels = 1:12, labels = date_names_lang("de")$mon)
  
-#Grafik
-    pdf(paste0(hauptPfad, "3_Resultate/33_Zusatz_Pegel_Tage_Monate-Jahre.pdf"), 
-        width = 13, height = 7) 
+#Aktuelles Jahr
+    aktuell <- filter(MonatJahrTag, Jahre == max(Jahre))
     
-        ggplot() + neutral + 
-            geom_line(data = MonatJahrTag, aes(x = TageOhneJahr, y = Pegel, color = Jahre)) +
-            facet_wrap(~ Monate, nrow = 3) +
-            scale_colour_manual(values = farben) +
-            labs (x = "Tag im Monat", y = "Pegel [m ü.M.]", color = "Jahre")  
+#Vorjahre
+    vorher <- filter(MonatJahrTag, Jahre < max(Jahre)) %>% 
+        group_by(Monate, TageOhneJahr) %>% 
+            summarize(minPegel = min(Pegel), 
+                      maxPegel = max(Pegel)) %>% 
+        ungroup() 
     
-    dev.off()
+#Legenden-Labels
+    leg <- c(paste(min(greif$Jahre), "bis", max(greif$Jahre) - 1), 
+                   max(greif$Jahre))
     
+#Grafik 
+    # https://stackoverflow.com/questions/28714492/legend-with-geom-line-and-geom-ribbon    
+    # analog: bar, line    
+    # https://community.rstudio.com/t/adding-a-legend-to-an-overlay-bar-and-line-plot/69331/6
         
-#--------------------------------------------------------------------------
-#Zusaetzlich: Pegel mit Hoch- und Niedrigwassergrenzen (und etwas schoener)
-#--------------------------------------------------------------------------
-  
-#Grafik-Parameter
-    xBeginn <- as_date("1998-1-1")
-    xEnde <- as_date("2022-1-1")
-    xSeqStriche <- seq(xBeginn, xEnde, by = "years") 
-    xSeqText <- year(xSeqStriche)
-    xSeqText[length(xSeqStriche)] <- ""
-    
-    yBeginn <- 434.5
-    yEnde <- 437 
-    ySeq <- seq(yBeginn, yEnde, by = 0.5)
-    yHoch <- 435.5
-    yNiedrig <- 435.15    
-    
-    poly <- tibble(x=c(xBeginn, xEnde, xEnde, xBeginn),
-        y = c(yNiedrig, yNiedrig, yHoch, yHoch)) 
-    
-    
-#Grafik
-    pdf(paste0(hauptPfad, "3_Resultate/34_Zusatz_Pegel_Tage_mit-Hoch-Niedrigwassergrenzen.pdf"), 
-        width = 9, height = 5)            
-            
-        ggplot() + neutral +
-            geom_polygon(data=poly, mapping=aes(x=x, y=y), fill = "grey90") +           
-            geom_vline(aes(xintercept = xSeqStriche), color = "grey90") +
-            geom_line(data = greif, aes(x = Tage, y = Pegel), color = "blue4") + 
-            labs (x = "", y = "Pegel [m ü.M.]") +
-            scale_x_date(limits = c(xBeginn, xEnde), breaks = xSeqStriche, 
-                labels = xSeqText, expand = c(0, 0)) +
-            theme(axis.text.x = element_text(hjust = -0.2)) +
-            scale_y_continuous(limits = c(yBeginn, yEnde), breaks = ySeq)    
-        
-    dev.off()   
-    
+    g4 <- ggplot() + 
+        geom_ribbon(data = vorher, 
+                    aes(x = TageOhneJahr, ymin=minPegel, ymax=maxPegel, fill = leg[1]), 
+                    alpha = 0.5) + 
+        geom_line(data = aktuell, aes(x = TageOhneJahr, y = Pegel, color = leg[2])) +
+        facet_wrap(~Monate, nrow = 3) + 
+        scale_fill_manual("", values = "grey80") +
+        scale_colour_manual("", values = "red") +
+        labs(x = "Tag im Monat", y = "Pegel [m ü.M.]") +      
+        neutral 
 
-    
-    
-# library(ggplot2) 
-# nz <- map_data("nz")
-# head(nz)
-# 
-# ggplot(nz, aes(long, lat, group = group)) +
-#   geom_polygon(fill = "white", colour = "black")
-# 
-# ggplot(nz, aes(long, lat, group = group)) +
-#   geom_polygon(fill = "white", colour = "black") +
-#   coord_quickmap()
+    ggsave(paste0(hauptPfad, "/Grafiken/4_Pegel_Tage_Monate-Jahre.pdf"), g4,
+        width = 20, height = 12, units = "cm")
 
- 
-    
+
+

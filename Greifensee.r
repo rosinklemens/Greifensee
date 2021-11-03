@@ -19,14 +19,10 @@
     #install.packages("readxl") 
     #install.packages("lubridate")
     #install.packages("here")
-   # install.packages("styler")
-   # install.packages("lintr")  
     library(tidyverse)
     library(readxl)
     library(lubridate)
     library(here)
-    library(styler)
-    library(lintr)   
 
 #Hauptpfad
     hauptPfad <- here()

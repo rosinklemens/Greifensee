@@ -161,12 +161,12 @@
                     alpha = 0.5) + 
         geom_line(data = aktuell, aes(x = TageOhneJahr, y = Pegel, color = leg[2])) +
         facet_wrap(~Monate, nrow = 3) + 
-        scale_fill_manual("", values = "grey80") +
+        scale_fill_manual("", values = "grey50") +
         scale_colour_manual("", values = "red") +
         labs(x = "Tag im Monat", y = "Pegel [m ü.M.]") +      
         neutral 
 
-    ggsave(paste0(haupt_pfad, "/Grafiken/4_Pegel_Tage_Monate-Jahre.pdf"), g4,
+    ggsave(paste0(hauptPfad, "/Grafiken/4_Pegel_Tage_Monate-Jahre.pdf"), g4,
         width = 20, height = 12, units = "cm")
 
 

@@ -223,7 +223,7 @@
                         fill = RibbonFaktor), 
                     alpha = 0.5) + 
         geom_line(data = aktuell, aes(x = TageOhneJahr, y = Pegel, color = leg[2])) +
-        scale_fill_manual("", values = look_quant$Farben) + 
+        scale_fill_manual(paste(leg[1], "(Quantile)"), values = look_quant$Farben) + 
         scale_colour_manual("", values = "black") +        
         facet_wrap(~Monate, nrow = 3) +
         labs(x = "Tag im Monat", y = "Pegel [m ü.M.]") +      

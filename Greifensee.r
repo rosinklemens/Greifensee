@@ -178,7 +178,7 @@
 #neu: Quantile anstatt graue Flaeche
     
 #Quantile waehlen
-    quant <- seq(0, 1, by = 0.1)
+    quant <- seq(0, 1, by = 0.2)
     
 #Lookup-Tabelle
     look_quant <- tibble(Min = quant[-length(quant)],
@@ -189,7 +189,8 @@
 #Vorjahre: Quantile
     vorher_qua <- filter(MonatJahrTag, Jahre < max(Jahre)) %>% 
         group_by(Monate, TageOhneJahr) %>%         
-            summarize(Pegel = quantile(Pegel, quant), Quantil = quant) %>% 
+            summarize(Pegel = quantile(Pegel, quant), 
+                      Quantil = quant) %>% 
         ungroup()
     
 #Pro Ribbon: unterer Wert

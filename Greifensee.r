@@ -25,7 +25,7 @@
     library(here)
 
 #Hauptpfad
-    hauptPfad <- here()
+    haupt_pfad <- here()
    
 #Funktion: Neutrales Design fuer ggplot
     neutral <- theme_bw() + theme(panel.grid.major = element_blank(),
@@ -45,7 +45,7 @@
 #--------------------------------------------------------------------------
 
 #Greifensee-Pegelstand importieren und aufbereiten
-    importPfad <- paste0(hauptPfad, "/Greifensee.csv") 
+    importPfad <- paste0(haupt_pfad, "/Greifensee.csv") 
     
     greif <- read_csv(importPfad) %>% 
             mutate(Tage = parse_date(Datum, format = "%d.%m.%Y"),
@@ -75,7 +75,7 @@
         labs(x = "", y = "Pegel [m ü.M.]") +
         neutral
     
-    ggsave(paste0(hauptPfad, "/Grafiken/1_Pegel_Tage.pdf"), g1,  
+    ggsave(paste0(haupt_pfad, "/Grafiken/1_Pegel_Tage.pdf"), g1,  
         width = 12, height = 8, units = "cm")
 
 
@@ -95,7 +95,7 @@
         geom_line(data = greifJahr, aes(x = Jahre, y = Pegel)) +
         labs(x = "", y = "Pegel [m ü.M.]") + neutral 
     
-    ggsave(paste0(hauptPfad, "/Grafiken/2_Pegel_Jahre.pdf"), g2,  
+    ggsave(paste0(haupt_pfad, "/Grafiken/2_Pegel_Jahre.pdf"), g2,  
         width = 12, height = 8, units = "cm")
 
 
@@ -119,7 +119,7 @@
         labs(x = "", y = "Pegel [m ü.M.]") +
         neutral   
     
-    ggsave(paste0(hauptPfad, "/Grafiken/3_Pegel_Monate-Jahre.pdf"), g3,  
+    ggsave(paste0(haupt_pfad, "/Grafiken/3_Pegel_Monate-Jahre.pdf"), g3,  
         width = 20, height = 15, units = "cm")
 
    
@@ -166,7 +166,7 @@
         labs(x = "Tag im Monat", y = "Pegel [m ü.M.]") +      
         neutral 
 
-    ggsave(paste0(hauptPfad, "/Grafiken/4_Pegel_Tage_Monate-Jahre.pdf"), g4,
+    ggsave(paste0(haupt_pfad, "/Grafiken/4_Pegel_Tage_Monate-Jahre.pdf"), g4,
         width = 20, height = 12, units = "cm")
 
 

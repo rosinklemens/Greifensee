@@ -170,4 +170,80 @@
         width = 20, height = 12, units = "cm")
 
 
+#--------------------------------------------------------------------------
+#Zusaetzlich: Quantile und einzelne Tagespegel
+#--------------------------------------------------------------------------
 
+#der Code baut auf der vorangehenden Grafik auf
+#neu: Quantile anstatt graue Flaeche
+    
+#Quantile waehlen
+    quant <- seq(0, 1, by = 0.1)
+    
+#Lookup-Tabelle
+    look_quant <- tibble(Min = quant[-length(quant)],
+                         Max = quant[-1],
+                         Ribbon = paste(Min * 100, "bis", Max * 100),
+                         Farben = colorRampPalette(c("red", "grey50", "blue"))(length(quant)-1))
+    
+#Vorjahre: Quantile
+    vorher_qua <- filter(MonatJahrTag, Jahre < max(Jahre)) %>% 
+        group_by(Monate, TageOhneJahr) %>%         
+            summarize(Pegel = quantile(Pegel, quant), Quantil = quant) %>% 
+        ungroup()
+    
+#Pro Ribbon: unterer Wert
+    vorher_unten <- left_join(vorher_qua, 
+                              select(look_quant, Min, Ribbon), 
+                              by = c("Quantil" = "Min")) %>% 
+        rename(Pegel_unten = Pegel) %>% 
+        filter(Quantil < quant[length(quant)]) %>% 
+        select(Monate, TageOhneJahr, Ribbon, Pegel_unten)
+    
+#Pro Ribbon: oberer Wert
+    vorher_oben <- left_join(vorher_qua, 
+                              select(look_quant, Max, Ribbon), 
+                              by = c("Quantil" = "Max")) %>% 
+        rename(Pegel_oben = Pegel) %>% 
+        filter(Quantil > quant[1]) %>%    
+        select(Monate, TageOhneJahr, Ribbon, Pegel_oben) 
+
+    
+#Ribbon (mit oberem und unterem Wert)
+    vorher_uo <- left_join(vorher_unten, vorher_oben,     
+               by = c("Monate", "TageOhneJahr", "Ribbon")) %>% 
+        mutate(RibbonFaktor = factor(Ribbon, levels = look_quant$Ribbon))
+    
+    
+#Grafik
+    g5 <- ggplot() + 
+        geom_ribbon(data = vorher_uo, 
+                    aes(x = TageOhneJahr, ymin=Pegel_unten, ymax=Pegel_oben, 
+                        fill = RibbonFaktor), 
+                    alpha = 0.5) + 
+        geom_line(data = aktuell, aes(x = TageOhneJahr, y = Pegel, color = leg[2])) +
+        scale_fill_manual("", values = look_quant$Farben) + 
+        scale_colour_manual("", values = "black") +        
+        facet_wrap(~Monate, nrow = 3) +
+        labs(x = "Tag im Monat", y = "Pegel [m ü.M.]") +      
+        neutral 
+
+    ggsave(paste0(hauptPfad, "/Grafiken/5_Pegel_Quantile.pdf"), g5,
+        width = 20, height = 12, units = "cm")
+    
+    
+    
+    
+        
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
